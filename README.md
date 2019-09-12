@@ -1,2 +1,2 @@
 # ServerLoginAlerter
-Work in progress
+Work In Progress, expect limited to no usage
