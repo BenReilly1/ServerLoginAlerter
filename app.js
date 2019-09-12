@@ -14,3 +14,7 @@ getAsync('whoami').then(data => {
 }).catch(err => {
     console.log('cmd err', err)
 })
+
+getAsync('netstat -n | find ":4499" | find "ESTABLISHED"').then (data => {
+    console.log(data)    
+}) 
