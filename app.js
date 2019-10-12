@@ -11,7 +11,8 @@ function whoamiCall() {
             console.log(config.apiID)
             const originalString = data[0]
             var loggedUser = originalString.split("\\")
-            netStatCall(loggedUser[1])
+            var whiteSpaceRemoval = loggedUser[1].replace(/(\r\n|\n|\r)/gm, "")
+            netStatCall(whiteSpaceRemoval)
         } catch(err) {
             console.log('cmd err', err.stack)
         }
@@ -28,7 +29,7 @@ function netStatCall(loggedUser) {
             var ipFiltering = ipAddressSplitter.filter(Boolean) // This is running the array through a check whereby it removes empty objects
             var connectionIP = ipFiltering[2] // This is grabbing the ip address from the array, spot 9    
             var splitConnectionIP = connectionIP.split(':') // Splits the IP and port
-            var useInApiCall = splitConnectionIP[0] // Drops the port ready for use in a API to find the location
+            var useInApiCall = splitConnectionIP[0] // Drops the port ready for use in a API to find the location]
             whatsappAlert(loggedUser, useInApiCall)
         } catch(err) {
             console.log('cmd err', err.stack)
@@ -42,7 +43,7 @@ function whatsappAlert(loggedUser, netstatInfo) {
     client.messages
         .create({
             from: config.whatsappFrom,
-            body: 'New login for ' + loggedUser + ' IP of ' + netstatInfo,
+            body: 'New login for ' + loggedUser + ' from IP: ' + netstatInfo,
             to: config.whatsappTo
         })
 }
