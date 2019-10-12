@@ -1,11 +1,14 @@
+const config = require('./config')
 const Promise = require('bluebird')
 const cmd = require('node-cmd')
- 
+const client = require('twilio')(config.apiID, config.apiToken);
+
 const getAsync = Promise.promisify(cmd.get, { multiArgs: true, context: cmd })
 
 function whoamiCall() {
     getAsync('whoami').then(data => {
         try {
+            console.log(config.apiID)
             const originalString = data[0]
             var loggedUser = originalString.split("\\")
             netStatCall(loggedUser[1])
@@ -26,14 +29,22 @@ function netStatCall(loggedUser) {
             var connectionIP = ipFiltering[2] // This is grabbing the ip address from the array, spot 9    
             var splitConnectionIP = connectionIP.split(':') // Splits the IP and port
             var useInApiCall = splitConnectionIP[0] // Drops the port ready for use in a API to find the location
-            console.log(loggedUser)
-            console.log(useInApiCall)
+            whatsappAlert(loggedUser, useInApiCall)
         } catch(err) {
             console.log('cmd err', err.stack)
         }
     }).catch(err => {
         console.log('cmd err', err)
     })
+}
+
+function whatsappAlert(loggedUser, netstatInfo) {
+    client.messages
+        .create({
+            from: config.whatsappFrom,
+            body: 'New login for ' + loggedUser + ' IP of ' + netstatInfo,
+            to: config.whatsappTo
+        })
 }
 
 whoamiCall()
