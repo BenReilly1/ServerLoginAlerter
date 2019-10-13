@@ -59,7 +59,7 @@ function whatsappAlert(loggedUser, netstatInfo, remainingBalance) {
     	apiKey: config.apiKey,
 	apiSecret: config.apiSecret,
     });
-    const text = 'New login for ' + loggedUser + ' from IP: ' + netstatInfo + '. Remaining balance is: ' + remainingBalance;
+    const text = 'New login for ' + loggedUser + ' from IP: ' + netstatInfo + '. Remaining balance is: £' + remainingBalance;
     nexmo.message.sendSms(config.sendFrom, config.sendTo, text);
 }
 
