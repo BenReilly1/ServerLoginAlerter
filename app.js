@@ -2,6 +2,7 @@ const config = require('./config')
 const Promise = require('bluebird')
 const cmd = require('node-cmd')
 const Nexmo = require('nexmo');
+const axios = require('axios')
 
 const getAsync = Promise.promisify(cmd.get, { multiArgs: true, context: cmd })
 
@@ -30,7 +31,7 @@ function netStatCall(loggedUser) {
             var connectionIP = ipFiltering[2] // This is grabbing the ip address from the array, spot 9    
             var splitConnectionIP = connectionIP.split(':') // Splits the IP and port
             var useInApiCall = splitConnectionIP[0] // Drops the port ready for use in a API to find the location]
-            whatsappAlert(loggedUser, useInApiCall)
+            balanceCalc(loggedUser, useInApiCall)
         } catch(err) {
             console.log('cmd err', err.stack)
         }
@@ -39,12 +40,26 @@ function netStatCall(loggedUser) {
     })
 }
 
-function whatsappAlert(loggedUser, netstatInfo) {
+function balanceCalc(loggedUser, netstatInfo) {
+    axios.get('https://rest.nexmo.com/account/get-balance?api_key='+ config.apiKey + '&api_secret=' + config.apiSecret)
+    .then(response => {
+        console.log(response.data.value)
+        const virginBal = response.data.value
+        const changedBal = virginBal - 0.03;
+        const remainingBalance = changedBal.toFixed(2)
+        whatsappAlert(loggedUser, netstatInfo, remainingBalance)
+    })
+    .catch(error => {
+        console.log(error)
+    })
+}
+
+function whatsappAlert(loggedUser, netstatInfo, remainingBalance) {
     const nexmo = new Nexmo({
     	apiKey: config.apiKey,
 	apiSecret: config.apiSecret,
     });
-    const text = 'New login for ' + loggedUser + ' from IP: ' + netstatInfo;
+    const text = 'New login for ' + loggedUser + ' from IP: ' + netstatInfo + '. Remaining balance is: ' + remainingBalance;
     nexmo.message.sendSms(config.sendFrom, config.sendTo, text);
 }
 
