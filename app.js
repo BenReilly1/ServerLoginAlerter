@@ -1,14 +1,14 @@
 const config = require('./config')
 const Promise = require('bluebird')
 const cmd = require('node-cmd')
-const client = require('twilio')(config.apiID, config.apiToken);
+const Nexmo = require('nexmo');
 
 const getAsync = Promise.promisify(cmd.get, { multiArgs: true, context: cmd })
 
 function whoamiCall() {
     getAsync('whoami').then(data => {
         try {
-            console.log(config.apiID)
+            console.log(config.apiKey)
             const originalString = data[0]
             var loggedUser = originalString.split("\\")
             var whiteSpaceRemoval = loggedUser[1].replace(/(\r\n|\n|\r)/gm, "")
@@ -40,12 +40,12 @@ function netStatCall(loggedUser) {
 }
 
 function whatsappAlert(loggedUser, netstatInfo) {
-    client.messages
-        .create({
-            from: config.whatsappFrom,
-            body: 'New login for ' + loggedUser + ' from IP: ' + netstatInfo,
-            to: config.whatsappTo
-        })
+    const nexmo = new Nexmo({
+    	apiKey: config.apiKey,
+	apiSecret: config.apiSecret,
+    });
+    const text = 'New login for ' + loggedUser + ' from IP: ' + netstatInfo;
+    nexmo.message.sendSms(config.sendFrom, config.sendTo, text);
 }
 
 whoamiCall()
